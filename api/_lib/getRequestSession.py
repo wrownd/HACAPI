@@ -32,7 +32,12 @@ def getRequestSession(username, password, school_id):
         loginScreenResponseText = loginScreenResponse.text
         parser = BeautifulSoup(loginScreenResponseText, "lxml")
 
-        requestVerificationToken = parser.find('input', attrs={'name': '__RequestVerificationToken_L0hvbWVBY2Nlc3M1'})["value"]
+        requestVerificationTokenElement = parser.find('input', attrs={'name': '__RequestVerificationToken_L0hvbWVBY2Nlc3M1'})
+        if requestVerificationTokenElement is not None:
+            requestVerificationToken = requestVerificationTokenElement["value"]
+        else:
+            # Handle the case where the element was not found or "value" is missing
+            requestVerificationToken = None  # Or set a default value or raise an error as needed
 
         requestHeaders = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36',
