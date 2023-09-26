@@ -11,14 +11,18 @@ def getRequestSession(username, password, school_id):
         # Set the current working directory to the directory of this script
         current_dir = os.path.dirname(os.path.abspath(__file__))
         os.chdir(current_dir)
-
-        # Now you can open 'schools.json'
+        # Load schools_data from the JSON file
         with open('schools.json', 'r') as schools_file:
-            schools_data = json.load(schools_file)  # Load schools_data from the JSON file
-
+            schools_data = json.load(schools_file)
+        
+        # Check if schools_data is a dictionary
+        if not isinstance(schools_data, dict):
+            raise ValueError("Invalid schools data in JSON file")
+        
         # Get the school name based on the school_id
         school_name = schools_data.get(school_id)
-
+        
+        # Check if school_name is None
         if school_name is None:
             raise ValueError("Invalid school ID")
 
