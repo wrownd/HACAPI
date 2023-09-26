@@ -7,7 +7,7 @@ def getRequestSession(username, password, school_id):
     requestSession = requests.session()
 
     # Load the school data from the JSON file
-    with open('schools.json', 'r') as schools_file:
+    with open('_lib/schools.json', 'r') as schools_file:
         schools_data = json.load(schools_file)
 
     # Get the school name based on the school_id
