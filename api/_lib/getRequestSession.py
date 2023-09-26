@@ -32,7 +32,18 @@ def getRequestSession(username, password, school_id):
     loginScreenResponseText = loginScreenResponse.text
     parser = BeautifulSoup(loginScreenResponseText, "lxml")
 
-    requestVerificationToken = parser.find('input', attrs={'name': '__RequestVerificationToken_L0hvbWVBY2Nlc3M1'})["value"]
+    # Check if the token exists in cookies
+    requestVerificationToken = requestSession.cookies.get('__RequestVerificationToken_L0hvbWVBY2Nlc3M1')
+
+    if requestVerificationToken is None:
+    # Token not found in cookies, try to find it in the HTML
+    requestVerificationTokenElement = parser.find('input', attrs={'name': '__RequestVerificationToken_L0hvbWVBY2Nlc3M1'})
+    
+    if requestVerificationTokenElement:
+        requestVerificationToken = requestVerificationTokenElement.get("value")
+    else:
+        # Handle the case when the element is not found in HTML
+        raise ValueError("RequestVerificationToken not found in cookies or HTML")
 
     requestHeaders = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36',
