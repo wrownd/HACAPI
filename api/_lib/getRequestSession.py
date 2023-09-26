@@ -6,7 +6,7 @@ import os
 
 def getRequestSession(username, password, school_id):
     try:
-        requestSession = requests.session()
+        requestSession, school_name = None, None  # Initialize to None
 
         # Set the current working directory to the directory of this script
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -18,7 +18,7 @@ def getRequestSession(username, password, school_id):
 
         # Get the school name based on the school_id
         school_name = schools_data.get(school_id)
-
+note
         if school_name is None:
             raise ValueError("Invalid school ID")
 
@@ -33,18 +33,20 @@ def getRequestSession(username, password, school_id):
         parser = BeautifulSoup(loginScreenResponseText, "lxml")
 
         requestVerificationTokenElement = parser.find('input', attrs={'name': '__RequestVerificationToken_L0hvbWVBY2Nlc3M1'})
+
         if requestVerificationTokenElement is not None:
             requestVerificationToken = requestVerificationTokenElement["value"]
         else:
             # Handle the case where the element was not found or "value" is missing
-            requestVerificationToken = None  # Or set a default value or raise an error as needed
+            # You can set a default value or raise an error here
+            raise ValueError("RequestVerificationToken not found")
 
         requestHeaders = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36',
             'X-Requested-With': 'XMLHttpRequest',
             'Host': 'hac23.esp.k12.ar.us',
-            'Origin': 'hac23.esp.k12.ar.us',
-            'Referer': "https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fhomeaccess%2f",
+            'Origin': 'https://hac23.esp.k12.ar.us',
+            'Referer': "https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f",
             '__RequestVerificationToken': requestVerificationToken
         }
 
@@ -68,7 +70,7 @@ def getRequestSession(username, password, school_id):
 
         return requestSession, school_name
     except ValueError as ve:
-        # Handle specific ValueErrors, e.g., invalid school ID
+        # Handle specific ValueErrors, e.g., invalid school ID or missing elements
         print(f"ValueError: {ve}")
         return None, None
     except requests.exceptions.RequestException as re:
