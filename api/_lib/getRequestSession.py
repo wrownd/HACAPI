@@ -62,7 +62,15 @@ def getRequestSession(username, password, school_id):
         )
 
         return requestSession, school_name
+    except ValueError as ve:
+        # Handle specific ValueErrors, e.g., invalid school ID
+        print(f"ValueError: {ve}")
+        return None, None
+    except requests.exceptions.RequestException as re:
+        # Handle requests.exceptions.RequestException (e.g., network issues)
+        print(f"RequestException: {re}")
+        return None, None
     except Exception as e:
-        # Handle exceptions here, e.g., log the error, return an error response, etc.
+        # Handle other exceptions here
         print(f"An error occurred: {e}")
-        return None, None  # Modify the return value as needed
+        return None, None
