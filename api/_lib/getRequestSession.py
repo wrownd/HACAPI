@@ -21,9 +21,16 @@ def getRequestSession(username, password, school_id):
     if school_name is None:
         raise ValueError("Invalid school ID")
 
-    loginScreenResponse = requestSession.get("https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f").text
+    # Make the HTTP GET request
+    loginScreenResponse = requestSession.get("https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f")
+    
+    # Check the HTTP status code
+    if loginScreenResponse.status_code != 200:
+        raise ValueError(f"Failed to retrieve login screen. Status code: {loginScreenResponse.status_code}")
 
-    parser = BeautifulSoup(loginScreenResponse, "lxml")
+    # Access the response text after verifying the status code
+    loginScreenResponseText = loginScreenResponse.text
+    parser = BeautifulSoup(loginScreenResponseText, "lxml")
 
     requestVerificationToken = parser.find('input', attrs={'name': '__RequestVerificationToken'})["value"]
 
