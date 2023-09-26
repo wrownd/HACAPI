@@ -2,13 +2,18 @@ import requests
 from bs4 import BeautifulSoup
 import lxml
 import json
+import os
 
 def getRequestSession(username, password, school_id):
     requestSession = requests.session()
 
-    # Load the school data from the JSON file
-    with open('_lib/schools.json', 'r') as schools_file:
-        schools_data = json.load(schools_file)
+    # Set the current working directory to the directory of this script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(current_dir)
+
+    # Now you can open 'schools.json'
+    with open('schools.json', 'r') as schools_file:
+        schools_data = json.load(schools_file)  # Load schools_data from the JSON file
 
     # Get the school name based on the school_id
     school_name = schools_data.get(school_id)
