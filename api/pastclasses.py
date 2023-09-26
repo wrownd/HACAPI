@@ -18,11 +18,11 @@ class handler(BaseHTTPRequestHandler):
     session = getRequestSession(username, password)
 
     pastCoursesRequestHeaders = {
-        "Host": "hac.friscoisd.org",
+        "Host": "hac23.esp.k12.ar.us",
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
         'X-Requested-With': 'XMLHttpRequest',
-        "Origin": "https://hac.friscoisd.org",
-        "Referer": "https://hac.friscoisd.org/HomeAccess/Content/Student/Assignments.aspx"
+        "Origin": "https://hac23.esp.k12.ar.us",
+        "Referer": "https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Assignments.aspx"
     }
 
     pastCoursesRequestPayload = {
@@ -84,7 +84,7 @@ class handler(BaseHTTPRequestHandler):
     }
 
     pastCoursesPageContent = session.post(
-        "https://hac.friscoisd.org/HomeAccess/Content/Student/Assignments.aspx",
+        "https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Assignments.aspx",
         data=pastCoursesRequestPayload,
         headers=pastCoursesRequestHeaders
     ).text

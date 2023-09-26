@@ -11,8 +11,8 @@ body {
 }
 
 body {
-  color: black;
-  background: #fffffe;
+  color: rgb(255, 254, 254);
+  background: #000000;
 }
 
 body, #__next {

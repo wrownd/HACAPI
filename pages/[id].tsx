@@ -81,7 +81,7 @@ const Route: React.FC<Props> = ({ route }) => {
         <h3 className="text-2xl mb-4 font-bold mt-10 text-headline">Example Request</h3>
         <CopyBlock
             language="javascript"
-            text={`axios.get("friscoisdhacapi.vercel.app${exampleRequest}").then((res) => {
+            text={`axios.get("hacapi.vercel.app${exampleRequest}").then((res) => {
   console.log(res.data);
 }).catch((error) => {
   console.log(error);

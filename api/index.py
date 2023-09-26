@@ -10,10 +10,6 @@ class handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write("""
-    <h1>Frisco ISD HAC API</h1>
-	<p>Documentation:</p>
-	<a href="https://friscoisdhacapi.vercel.app/" target="_blank">https://friscoisdhacapi.vercel.app/</a>
-    """.encode(encoding="utf_8"))
+        self.wfile.write("""hacapi | v1.0""".encode(encoding="utf_8"))
 
         return
