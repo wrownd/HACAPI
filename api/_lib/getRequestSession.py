@@ -24,7 +24,7 @@ def getRequestSession(username, password):
         "__RequestVerificationToken" : requestVerificationToken,
         "SCKTY00328510CustomEnabled" : "False",
         "SCKTY00436568CustomEnabled" : "False",
-        "Database" : "10",
+        "Database" : "380",
         "VerificationOption" : "UsernamePassword",
         "LogOnDetails.UserName": username,
         "tempUN" : "",
@@ -39,4 +39,3 @@ def getRequestSession(username, password):
     )
 
     return requestSession
-
