@@ -18,7 +18,7 @@ def getRequestSession(username, password, school_id):
 
         # Get the school name based on the school_id
         school_name = schools_data.get(school_id)
-note
+
         if school_name is None:
             raise ValueError("Invalid school ID")
 
