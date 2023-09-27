@@ -301,7 +301,10 @@ def getRequestSession(username, password, school_id):
         if school_name is None:
             raise ValueError("Invalid school ID")
 
-        # Make the HTTP GET request
+        # Create a requests session
+        requestSession = requests.session()
+
+        # Make the HTTP GET request to the login page
         loginScreenResponse = requestSession.get("https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f")
 
         # Check the HTTP status code
@@ -316,8 +319,6 @@ def getRequestSession(username, password, school_id):
         if requestVerificationTokenElement is not None:
             requestVerificationToken = requestVerificationTokenElement["value"]
         else:
-            # Handle the case where the element was not found or "value" is missing
-            # You can set a default value or raise an error here
             raise ValueError("RequestVerificationToken not found")
 
         requestHeaders = {
@@ -341,22 +342,29 @@ def getRequestSession(username, password, school_id):
             "LogOnDetails.Password": password
         }
 
+        # Make the POST request to log in
         pageDOM = requestSession.post(
             "https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f",
             data=requestPayload,
             headers=requestHeaders
         )
 
+        # Check if the login was successful by inspecting the resulting pageDOM
+
+        # You might want to add some conditions to check if the login was successful.
+        # For example, check for specific elements in pageDOM that indicate a successful login.
+        # If login failed, raise an exception or return an error message accordingly.
+
         return requestSession, school_name
+
     except ValueError as ve:
-        # Handle specific ValueErrors, e.g., invalid school ID or missing elements
         print(f"ValueError: {ve}")
         return None, None
+
     except requests.exceptions.RequestException as re:
-        # Handle requests.exceptions.RequestException (e.g., network issues)
         print(f"RequestException: {re}")
         return None, None
+
     except Exception as e:
-        # Handle other exceptions here
         print(f"An error occurred: {e}")
         return None, None
