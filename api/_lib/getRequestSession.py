@@ -1,7 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import json
-import os
 
 data = {
     "10": "Academics Plus Charter",
@@ -283,90 +281,72 @@ data = {
     "2770": "Yellville-Summit School District"
 }
 
+
 def get_school_name(school_id):
-    try:
-        school_name = data[school_id]
-        return school_name
-    except KeyError:
-        return "School not found"
+  try:
+    school_name = data[school_id]
+    return school_name
+  except KeyError:
+    return "School not found"
+
 
 def getRequestSession(username, password, school_id):
-    try:
-        requestSession, school_name = None, None  # Initialize to None
-        
-        # Get the school name based on the school_id
-        school_name = get_school_name(school_id)
-        
-        # Check if school_name is None
-        if school_name is None:
-            raise ValueError("Invalid school ID")
 
-        # Create a requests session
-        requestSession = requests.session()
+  school_name = get_school_name(school_id)
 
-        # Make the HTTP GET request to the login page
-        loginScreenResponse = requestSession.get("https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f")
+  login_url = "https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn"
 
-        # Check the HTTP status code
-        loginScreenResponse.raise_for_status()
+  # Create a session to persist cookies
+  session = requests.Session()
 
-        # Access the response text after verifying the status code
-        loginScreenResponseText = loginScreenResponse.text
-        # Parse the HTML content
-        parser = BeautifulSoup(loginScreenResponseText, 'html.parser')
-        
-        # Find the input element with the name '__RequestVerificationToken'
-        requestVerificationTokenElement = parser.find('input', {'name': '__RequestVerificationToken'})
-        
-        if requestVerificationTokenElement is not None:
-            requestVerificationToken = requestVerificationTokenElement['value']
-        else:
-            raise ValueError("RequestVerificationToken not found")
+  # Perform an initial GET request to obtain cookies
+  login_page = session.get(login_url)
+  login_page.raise_for_status()
 
-        requestHeaders = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Host': 'hac23.esp.k12.ar.us',
-            'Origin': 'https://hac23.esp.k12.ar.us',
-            'Referer': "https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f",
-            '__RequestVerificationToken': requestVerificationToken
-        }
+  # Parse the response HTML
+  loginScreenResponseText = login_page.text
+  parser = BeautifulSoup(loginScreenResponseText, 'html.parser')
 
-        requestPayload = {
-            "__RequestVerificationToken": requestVerificationToken,
-            "SCKTY00328510CustomEnabled": "False",
-            "SCKTY00436568CustomEnabled": "False",
-            "Database": school_id,
-            "VerificationOption": "UsernamePassword",
-            "LogOnDetails.UserName": username,
-            "tempUN": "",
-            "tempPW": "",
-            "LogOnDetails.Password": password
-        }
+  # Find the __RequestVerificationToken input element
+  requestVerificationTokenElement = parser.find(
+      'input', {'name': '__RequestVerificationToken'})
 
-        # Make the POST request to log in
-        pageDOM = requestSession.post(
-            "https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f",
-            data=requestPayload,
-            headers=requestHeaders
-        )
+  if requestVerificationTokenElement is not None:
+    # Get the value attribute of the input element
+    requestVerificationToken = requestVerificationTokenElement['value']
+  else:
+    raise ValueError("RequestVerificationToken not found")
 
-        # Check if the login was successful by inspecting the resulting pageDOM
+  # Now, you have the RequestVerificationToken value in the requestVerificationToken variable
+  print("RequestVerificationToken:", requestVerificationToken)
 
-        # You might want to add some conditions to check if the login was successful.
-        # For example, check for specific elements in pageDOM that indicate a successful login.
-        # If login failed, raise an exception or return an error message accordingly.
+  # Prepare the login data using the obtained token
+  login_data = {
+      "Database": school_id,
+      "LogOnDetails.UserName": username,
+      "LogOnDetails.Password": password,
+      "__RequestVerificationToken": requestVerificationToken,
+      "VerificationOption": "UsernamePassword"
+  }
 
-        return requestSession, school_name
+  # Define request headers
+  requestHeaders = {
+      'User-Agent':
+      'Your User Agent',
+      'X-Requested-With':
+      'XMLHttpRequest',
+      'Host':
+      'hac23.esp.k12.ar.us',
+      'Origin':
+      'https://hac23.esp.k12.ar.us',
+      'Referer':
+      "https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f"
+  }
 
-    except ValueError as ve:
-        print(f"ValueError: {ve}")
-        return None, None
+  # Perform the login by sending a POST request with the login data and headers
+  login_response = session.post(login_url,
+                                data=login_data,
+                                headers=requestHeaders)
+  login_response.raise_for_status()
 
-    except requests.exceptions.RequestException as re:
-        print(f"RequestException: {re}")
-        return None, None
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None, None
+  return session, school_name
