@@ -312,12 +312,14 @@ def getRequestSession(username, password, school_id):
 
         # Access the response text after verifying the status code
         loginScreenResponseText = loginScreenResponse.text
-        parser = BeautifulSoup(loginScreenResponseText, "lxml")
-
-        requestVerificationTokenElement = parser.find('input', attrs={'name': '__RequestVerificationToken_L0hvbWVBY2Nlc3M1'})
-
+        # Parse the HTML content
+        parser = BeautifulSoup(loginScreenResponseText, 'html.parser')
+        
+        # Find the input element with the name '__RequestVerificationToken'
+        requestVerificationTokenElement = parser.find('input', {'name': '__RequestVerificationToken'})
+        
         if requestVerificationTokenElement is not None:
-            requestVerificationToken = requestVerificationTokenElement["value"]
+            requestVerificationToken = requestVerificationTokenElement['value']
         else:
             raise ValueError("RequestVerificationToken not found")
 
