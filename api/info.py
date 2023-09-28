@@ -6,10 +6,12 @@ from api._lib.getRequestSession import getRequestSession
 
 def handler(event, context):
     # Extract the parameters from the event
-    query_string = event.get('queryStringParameters', '')
-    username = query_string.get("username", "")
-    password = query_string.get("password", "")
-    school_id = query_string.get("sd", "380")
+    query_string = event.get('queryStringParameters', {})
+    query_dict = dict(parse.parse_qsl(query_string))
+    
+    username = query_dict.get("username", "")
+    password = query_dict.get("password", "")
+    school_id = query_dict.get("sd", "380")
 
     # Check if any of the required parameters is missing
     if not username or not password:
