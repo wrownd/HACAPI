@@ -3,7 +3,7 @@ from urllib import parse
 import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
-from getRequestSession import getRequestSession
+from api._lib.getRequestSession import getRequestSession
 
 def main():
     # Extract the parameters from the URL
