@@ -3,6 +3,7 @@ from urllib import parse
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
 from api._lib.getRequestSession import getRequestSession
+from http.server import BaseHTTPRequestHandler
 
 def handler(event, context):
     # Extract the parameters from the event
