@@ -10,11 +10,11 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         query_string = parse.urlsplit(self.path).query
-        query_dict = dict(parse.parse_qsl(query_string))
+        query_dict = dict(parse.parse_qsl(query_string)
 
         username = query_dict.get("username", "")
         password = query_dict.get("password", "")
-        school_id = query_dict.get("sd", "380")  # Default to 380 if not provided
+        school_id = query_dict.get("sd", "380")  # Default to 380 (CSD) if not provided, NO PRODUCTION
 
         if not username or not password:
             self.send_response(400)
@@ -23,39 +23,41 @@ class handler(BaseHTTPRequestHandler):
             return
             
         try:
-        session, school_name = getRequestSession(username, password, school_id)
+            session, school_name = getRequestSession(username, password, school_id)
 
-        schedulePageContent = session.get("https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Classes.aspx").text
+            schedulePageContent = session.get("https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Classes.aspx").text
 
+            parser = BeautifulSoup(schedulePageContent, "lxml")
 
-        parser = BeautifulSoup(schedulePageContent, "lxml")
+            schedule = []
 
-        schedule = []
+            courses = parser.find_all("tr", "sg-asp-table-data-row")
 
-        courses = parser.find_all("tr", "sg-asp-table-data-row")
+            for row in courses:
+                parser = BeautifulSoup(f"<html><body>{row}</body></html>", "lxml")
+                tds = [x.text.strip() for x in parser.find_all("td")]
 
-        for row in courses:
-            parser = BeautifulSoup(f"<html><body>{row}</body></html>", "lxml")
-            tds = [x.text.strip() for x in parser.find_all("td")]
+                if(len(tds) > 3):
+                    schedule.append({
+                        "building": tds[7],
+                        "courseCode": tds[0],
+                        "courseName": tds[1],
+                        "days": tds[5],
+                        "markingPeriods": tds[6],
+                        "periods": tds[2],
+                        "room": tds[4],
+                        "status": tds[8],
+                        "teacher": tds[3],
+                    })
 
-            if(len(tds) > 3):
-                schedule.append({
-                    "building": tds[7],
-                    "courseCode": tds[0],
-                    "courseName": tds[1],
-                    "days": tds[5],
-                    "markingPeriods": tds[6],
-                    "periods": tds[2],
-                    "room": tds[4],
-                    "status": tds[8],
-                    "teacher": tds[3],
-                })
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "studentSchedule": schedule,
+            }).encode(encoding="utf_8"))
 
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
-        self.wfile.write(json.dumps({
-            "studentSchedule": schedule,
-        }).encode(encoding="utf_8"))
-
-        return
+            return
+        except Exception as e:
+            # Handle exceptions, if needed
+            print(f"An error occurred: {e}")
