@@ -3,16 +3,13 @@ from urllib import parse
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
 from api._lib.getRequestSession import getRequestSession
-from http.server import BaseHTTPRequestHandler
 
-def handler(event, context):
-    # Extract the parameters from the event
-    query_string = event.get('queryStringParameters', {})
-    query_dict = dict(parse.parse_qsl(query_string))
-    
-    username = query_dict.get("username", "")
-    password = query_dict.get("password", "")
-    school_id = query_dict.get("sd", "380")
+def handler(request):
+    # Extract the parameters from the query string
+    query_string = request.query
+    username = query_string.get("username", "")
+    password = query_string.get("password", "")
+    school_id = query_string.get("sd", "380")
 
     # Check if any of the required parameters is missing
     if not username or not password:
