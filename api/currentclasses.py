@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler
 from bs4 import BeautifulSoup
 import json
 from urllib import parse
-from requests.exceptions import RequestException  # Make sure to import RequestException
+from requests.exceptions import RequestException
 from api._lib.getRequestSession import getRequestSession
 
 class handler(BaseHTTPRequestHandler):
@@ -11,12 +11,10 @@ class handler(BaseHTTPRequestHandler):
         query_string = parse.urlsplit(self.path).query
         query_dict = dict(parse.parse_qsl(query_string))
 
-        # Extract the parameters from the URL
         username = query_dict.get("username", "")
         password = query_dict.get("password", "")
         school_id = query_dict.get("sd", "380")  # Default to 380 if not provided
 
-        # Check if any of the required parameters is missing
         if not username or not password:
             self.send_response(400)
             self.end_headers()
@@ -24,7 +22,6 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
-            # Use the getRequestSession function with the provided parameters
             session, school_name = getRequestSession(username, password, school_id)
 
             registrationPageContent = session.get("https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Assignments.aspx").text
@@ -38,8 +35,8 @@ class handler(BaseHTTPRequestHandler):
             for container in courseContainer:
                 newCourse = {
                     "name": "",
+                    "subname": "",
                     "grade": "",
-                    "lastUpdated": "",
                     "assignments": []
                 }
                 parser = BeautifulSoup(
@@ -52,11 +49,9 @@ class handler(BaseHTTPRequestHandler):
                     parser = BeautifulSoup(
                         f"<html><body>{hc}</body></html>", "lxml")
 
-                    newCourse["name"] = parser.find(
-                        "a", "sg-header-heading").text.strip()
-
-                    newCourse["lastUpdated"] = parser.find(
-                        "span", "sg-header-sub-heading").text.strip().replace("(Last Updated: ", "").replace(")", "")
+                    name_parts = parser.find("a", "sg-header-heading").text.strip().split('-')
+                    newCourse["name"] = name_parts[1].strip()
+                    newCourse["subname"] = name_parts[0].strip()
 
                     newCourse["grade"] = parser.find("span", "sg-header-heading sg-right").text.strip().replace("Student Grades ", "").replace("%", "")
 
