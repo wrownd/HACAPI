@@ -10,11 +10,11 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         query_string = parse.urlsplit(self.path).query
-        query_dict = dict(parse.parse_qsl(query_string)
+        query_dict = dict(parse.parse_qsl(query_string))
 
         username = query_dict.get("username", "")
         password = query_dict.get("password", "")
-        school_id = query_dict.get("sd", "380")  # Default to 380 (CSD) if not provided, NO PRODUCTION
+        school_id = query_dict.get("sd", "380")  # Default to CSD if not provided
 
         if not username or not password:
             self.send_response(400)
