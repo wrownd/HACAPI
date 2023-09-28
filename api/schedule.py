@@ -1,23 +1,32 @@
 from http.server import BaseHTTPRequestHandler
 from bs4 import BeautifulSoup
 import json
-import lxml
 from urllib import parse
+from requests.exceptions import RequestException
 
 from api._lib.getRequestSession import getRequestSession
 
 class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
-        dic = dict(parse.parse_qsl(parse.urlsplit(self.path).query))
+        query_string = parse.urlsplit(self.path).query
+        query_dict = dict(parse.parse_qsl(query_string))
 
-        username = dic["username"]
-        password = dic["password"]
+        username = query_dict.get("username", "")
+        password = query_dict.get("password", "")
+        school_id = query_dict.get("sd", "380")  # Default to 380 if not provided
 
-        session = getRequestSession(username, password)
+        if not username or not password:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "Missing username or password"}).encode(encoding="utf_8"))
+            return
+            
+        try:
+        session, school_name = getRequestSession(username, password, school_id)
 
-        schedulePageContent = session.get(
-            "https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Classes.aspx").text
+        schedulePageContent = session.get("https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Classes.aspx").text
+
 
         parser = BeautifulSoup(schedulePageContent, "lxml")
 
