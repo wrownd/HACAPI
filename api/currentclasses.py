@@ -51,7 +51,7 @@ class handler(BaseHTTPRequestHandler):
 
                     name_parts = parser.find("a", "sg-header-heading").text.strip().split('-')
                     newCourse["name"] = name_parts[1].strip()
-                    newCourse["subname"] = name_parts[0].strip()
+                    newCourse["subname"] = f"{name_parts[0].strip()} - {name_parts[1].strip()}"
 
                     grade_span = parser.find("span", "sg-header-heading sg-right").text.strip()
                     if "Student Grades" in grade_span:
