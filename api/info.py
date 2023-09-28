@@ -1,24 +1,26 @@
 import json
 from urllib import parse
-import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
 from api._lib.getRequestSession import getRequestSession
 
-def main():
-    # Extract the parameters from the URL
-    query_string = parse.urlsplit(self.path).query
-    query_dict = dict(parse.parse_qsl(query_string))
-
-    username = query_dict.get("username", "")
-    password = query_dict.get("password", "")
-    school_id = query_dict.get("sd", "380")
+def handler(event, context):
+    # Extract the parameters from the event
+    query_string = event.get('queryStringParameters', '')
+    username = query_string.get("username", "")
+    password = query_string.get("password", "")
+    school_id = query_string.get("sd", "380")
 
     # Check if any of the required parameters is missing
     if not username or not password:
         response_data = {"error": "Missing username or password"}
-        print(json.dumps(response_data))
-        return
+        return {
+            "statusCode": 400,
+            "headers": {
+                "Content-Type": "application/json",
+            },
+            "body": json.dumps(response_data),
+        }
 
     try:
         # Call the getRequestSession function to obtain the session and school name
@@ -35,8 +37,6 @@ def main():
         studentGrade = parser.find(id="plnMain_lblGrade").text
         totalCredits = 0
 
-        # ... your other processing ...
-
         response_data = {
             "id": "studentId",
             "name": studentName,
@@ -47,7 +47,13 @@ def main():
             "totalCredits": str(totalCredits),
             "school_name": school_name,
         }
-        print(json.dumps(response_data))
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Content-Type": "application/json",
+            },
+            "body": json.dumps(response_data),
+        }
 
     except RequestException as e:
         # Handle requests-related exceptions
@@ -55,7 +61,13 @@ def main():
             "error": "Internal Server Error",
             "message": str(e),  # Include the exception message for debugging
         }
-        print(json.dumps(error_response))
+        return {
+            "statusCode": 500,
+            "headers": {
+                "Content-Type": "application/json",
+            },
+            "body": json.dumps(error_response),
+        }
 
     except Exception as e:
         # Handle other exceptions
@@ -63,7 +75,10 @@ def main():
             "error": "Internal Server Error",
             "message": str(e),  # Include the exception message for debugging
         }
-        print(json.dumps(error_response))
-
-if __name__ == '__main__':
-    main()
+        return {
+            "statusCode": 500,
+            "headers": {
+                "Content-Type": "application/json",
+            },
+            "body": json.dumps(error_response),
+        }
