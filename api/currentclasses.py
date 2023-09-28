@@ -54,8 +54,8 @@ class handler(BaseHTTPRequestHandler):
                     newCourse["subname"] = f"{name_parts[0].strip()} - {name_parts[1].strip()}"
 
                     grade_span = parser.find("span", "sg-header-heading sg-right").text.strip()
-                    if "Student Grades" in grade_span:
-                        newCourse["grade"] = grade_span.replace("Student Grades", "").strip()
+                    if "9 Weeks Grade " in grade_span:
+                        newCourse["grade"] = grade_span.replace("9 Weeks Grade ", "").strip()
                     else:
                         newCourse["grade"] = grade_span
 
