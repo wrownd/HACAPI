@@ -35,7 +35,6 @@ class handler(BaseHTTPRequestHandler):
             for container in courseContainer:
                 newCourse = {
                     "name": "",
-                    "subname": "",
                     "grade": "",
                     "assignments": []
                 }
@@ -52,13 +51,10 @@ class handler(BaseHTTPRequestHandler):
                     name_parts = parser.find("a", "sg-header-heading").text.strip().split('-')
                     # Remove numbers right next to the dash and extra spaces
                     name = ' '.join([part.strip() for part in name_parts[1].strip().split()])
-                    subname = name_parts[0].strip()
                     newCourse["name"] = name
-                    newCourse["subname"] = f"{subname} - {name_parts[1].strip()}"
-
                     grade_span = parser.find("span", "sg-header-heading sg-right").text.strip()
-                    if "Student Grades" in grade_span:
-                        newCourse["grade"] = grade_span.replace("Student Grades", "").strip()
+                    if "9 Weeks Grade " in grade_span:
+                        newCourse["grade"] = grade_span.replace("9 Weeks Grade ", "").strip()
                     else:
                         newCourse["grade"] = grade_span
 
