@@ -93,7 +93,7 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({
-                "currentClasses": courses,
+                "grades": courses,
             }).encode(encoding="utf_8"))
 
         except RequestException as e:
