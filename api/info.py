@@ -31,8 +31,9 @@ class handler(BaseHTTPRequestHandler):
             registrationPageContent = session.get("https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Registration.aspx").text
 
             parser = BeautifulSoup(registrationPageContent, "lxml")
-
+            studentLang = parser.find(id="plnMain_lblLanguage").text
             studentName = parser.find(id="plnMain_lblRegStudentName").text
+            studentSSN = parser.find(id="plnMain_lblSSN").text
             studentBirthdate = parser.find(id="plnMain_lblBirthDate").text
             studentCounselor = parser.find(id="plnMain_lblCounselor").text
             studentCampus = parser.find(id="plnMain_lblBuildingName").text
@@ -44,7 +45,8 @@ class handler(BaseHTTPRequestHandler):
             self.end_headers()
 
             response_data = {
-                "id": "studentId",
+                "lang": studentLang,
+                "ssn": studentSSN,
                 "name": studentName,
                 "birthdate": studentBirthdate,
                 "campus": studentCampus,
