@@ -2,11 +2,21 @@ from http.server import BaseHTTPRequestHandler
 from bs4 import BeautifulSoup
 import json
 from urllib import parse
-from requests.exceptions import RequestException  # Make sure to import RequestException
+from requests.exceptions import RequestException
 
 from api._lib.getRequestSession import getRequestSession
 
 class handler(BaseHTTPRequestHandler):
+
+    def send_error_response(self, error_message):
+        self.send_response(400)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        error_response = {
+            "error": "Bad Request",
+            "message": error_message
+        }
+        self.wfile.write(json.dumps(error_response).encode(encoding="utf_8"))
 
     def do_GET(self):
         query_string = parse.urlsplit(self.path).query
@@ -16,19 +26,23 @@ class handler(BaseHTTPRequestHandler):
         username = query_dict.get("username", "")
         password = query_dict.get("password", "")
         school_id = query_dict.get("sd", "380")  # Default to 380 if not provided
+        url = query_dict.get("url", "")
 
         # Check if any of the required parameters is missing
         if not username or not password:
-            self.send_response(400)
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Missing username or password"}).encode(encoding="utf_8"))
+            self.send_error_response("Missing username or password")
             return
+
+        if not url:
+            self.send_error_response("Missing school domain")
+            return
+
 
         try:
             # Use the getRequestSession function with the provided parameters
-            session, school_name = getRequestSession(username, password, school_id)
+            session, school_name = getRequestSession(username, password, url, school_id)
 
-            registrationPageContent = session.get("https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Registration.aspx").text
+            registrationPageContent = session.get(f"https://{url}/HomeAccess/Content/Student/Registration.aspx").text
 
             parser = BeautifulSoup(registrationPageContent, "lxml")
             studentLang = parser.find(id="plnMain_lblLanguage").text
@@ -59,17 +73,10 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(response_json)
 
         except RequestException as e:
-            # Handle requests-related exceptions
-            error_response = {
-                "error": "Internal Server Error",
-                "message": str(e),
-            }
-            self.wfile.write(json.dumps(error_response).encode(encoding="utf_8"))
+            self.send_error_response(f"An error occurred: {str(e)}")
+
+        except ValueError as e:
+            self.send_error_response(f"An error occurred: {str(e)}")
 
         except Exception as e:
-            # Handle other exceptions
-            error_response = {
-                "error": "Internal Server Error",
-                "message": str(e),  # Include the exception message for debugging
-            }
-            self.wfile.write(json.dumps(error_response).encode(encoding="utf_8"))
+            self.send_error_response(f"An error occurred: {str(e)}")
