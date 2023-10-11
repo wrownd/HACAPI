@@ -4,7 +4,6 @@ import json
 import os
 from urllib.parse import urlparse, parse_qs
 
-# Load school data from schools.json
 current_directory = os.path.dirname(os.path.realpath(__file__))
 file_path = os.path.join(current_directory, "schools.json")
 
@@ -12,7 +11,7 @@ if os.path.exists(file_path):
     with open(file_path, "r") as file:
         data = json.load(file)
 else:
-    print("File 'schools.json' not found.")
+    print("schools.json was not found.")
     data = {}
 
 def get_school_info(domain, school_id):
@@ -39,20 +38,16 @@ def getRequestSession(username, password, url, school_id):
   login_url = f"https://{url}/HomeAccess/Account/LogOn"
   print(login_url)
 
-  # Create a session to persist cookies
   session = requests.Session()
 
-  # Perform an initial GET request to obtain cookies
   login_page = session.get(login_url)
   login_page.raise_for_status()
 
   print("Status Code:", login_page.status_code)
 
-  # Parse the response HTML
   loginScreenResponseText = login_page.text
   parser = BeautifulSoup(loginScreenResponseText, 'html.parser')
 
-  # Find the __RequestVerificationToken input element
   requestVerificationTokenElement = parser.find(
       'input', {'name': '__RequestVerificationToken'})
 
@@ -62,10 +57,8 @@ def getRequestSession(username, password, url, school_id):
   else:
     raise ValueError("RequestVerificationToken not found")
 
-  # Now, you have the RequestVerificationToken value in the requestVerificationToken variable
   print("RequestVerificationToken:", requestVerificationToken)
 
-  # Prepare the login data using the obtained token
   login_data = {
     "Database": school_id,
     "LogOnDetails.UserName": username,
@@ -74,7 +67,6 @@ def getRequestSession(username, password, url, school_id):
     "VerificationOption": "UsernamePassword"
     }
 
-  # Define request headers
   requestHeaders = {
       'User-Agent':
       'Your User Agent',
@@ -88,10 +80,7 @@ def getRequestSession(username, password, url, school_id):
       "https://hac23.esp.k12.ar.us/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f"
   }
 
-  # Perform the login by sending a POST request with the login data and headers
-  login_response = session.post(login_url,
-                                data=login_data,
-                                headers=requestHeaders)
+  login_response = session.post(login_url, data=login_data, headers=requestHeaders)
   login_response.raise_for_status()
 
   return session, school_name

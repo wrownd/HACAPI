@@ -13,16 +13,19 @@ class handler(BaseHTTPRequestHandler):
 
         username = query_dict.get("username", "")
         password = query_dict.get("password", "")
-        school_id = query_dict.get("sd", "380")  # Default to 380 if not provided
+        school_id = query_dict.get("sd", "1")
+        url = query_dict.get("url", "")
 
         if not username or not password:
-            self.send_response(400)
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Missing username or password"}).encode(encoding="utf_8"))
+            self.send_error_response("Missing username or password")
+            return
+
+        if not url:
+            self.send_error_response("Missing school domain")
             return
 
         try:
-            session, school_name = getRequestSession(username, password, school_id)
+            session, school_name = getRequestSession(username, password, url, school_id)
 
             registrationPageContent = session.get("https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Assignments.aspx").text
 
@@ -49,7 +52,6 @@ class handler(BaseHTTPRequestHandler):
                         f"<html><body>{hc}</body></html>", "lxml")
 
                     name_parts = parser.find("a", "sg-header-heading").text.strip().split('-')
-                    # Remove numbers right next to the dash and extra spaces
                     name = ' '.join([part.strip() for part in name_parts[1].strip().split()])
                     newCourse["name"] = name
                     grade_span = parser.find("span", "sg-header-heading sg-right").text.strip()
@@ -92,9 +94,7 @@ class handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({
-                "grades": courses,
-            }).encode(encoding="utf_8"))
+            self.wfile.write(json.dumps(courses).encode(encoding="utf_8"))
 
         except RequestException as e:
             self.send_response(500)

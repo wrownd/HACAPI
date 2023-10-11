@@ -14,16 +14,19 @@ class handler(BaseHTTPRequestHandler):
 
         username = query_dict.get("username", "")
         password = query_dict.get("password", "")
-        school_id = query_dict.get("sd", "380")  # Default to CSD if not provided
+        school_id = query_dict.get("sd", "1")
+        url = query_dict.get("url", "")
 
         if not username or not password:
-            self.send_response(400)
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Missing username or password"}).encode(encoding="utf_8"))
+            self.send_error_response("Missing username or password")
+            return
+
+        if not url:
+            self.send_error_response("Missing school domain")
             return
             
         try:
-            session, school_name = getRequestSession(username, password, school_id)
+            session, school_name = getRequestSession(username, password, url, school_id)
 
             schedulePageContent = session.get("https://hac23.esp.k12.ar.us/HomeAccess/Content/Student/Classes.aspx").text
 
@@ -53,11 +56,8 @@ class handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({
-                "studentSchedule": schedule,
-            }).encode(encoding="utf_8"))
+            self.wfile.write(json.dumps(schedule).encode(encoding="utf_8"))
 
             return
         except Exception as e:
-            # Handle exceptions, if needed
             print(f"An error occurred: {e}")
