@@ -56,9 +56,13 @@ class handler(BaseHTTPRequestHandler):
                     newCourse["name"] = name
                     grade_span = parser.find("span", "sg-header-heading sg-right").text.strip()
                     if "9 Weeks Grade " in grade_span:
-                        newCourse["grade"] = grade_span.replace("9 Weeks Grade ", "").strip()
+                        grade_value = grade_span.replace("9 Weeks Grade ", "").strip()
                     else:
-                        newCourse["grade"] = grade_span
+                        grade_value = grade_span
+
+                    grade_value = grade_value.replace('%', '')
+
+                    newCourse["grade"] = grade_value
 
                 for ac in assignementsContainer:
                     parser = BeautifulSoup(
