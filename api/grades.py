@@ -50,11 +50,8 @@ class handler(BaseHTTPRequestHandler):
                 for hc in headerContainer:
                     parser = BeautifulSoup(f"<html><body>{hc}</body></html>", "lxml")
                 
-                    name_parts = parser.find("a", "sg-header-heading").text.strip().split('-')
-                    code = f'4 - {name_parts[1].strip()}'  # Include the '4' in the code and remove extra spaces
-                    name = ' '.join(name_parts[1].strip().split())  # Remove extra spaces from the course name
+                    name = parser.find("a", "sg-header-heading").text
                     newCourse["name"] = name
-                    newCourse["code"] = code  # Add the code to the course object
                     grade_span = parser.find("span", "sg-header-heading sg-right").text.strip()
                     if "9 Weeks Grade " in grade_span:
                         grade_value = grade_span.replace("9 Weeks Grade ", "").strip()
