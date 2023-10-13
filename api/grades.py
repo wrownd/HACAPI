@@ -49,17 +49,23 @@ class handler(BaseHTTPRequestHandler):
 
                 for hc in headerContainer:
                     parser = BeautifulSoup(f"<html><body>{hc}</body></html>", "lxml")
-                
-                    name = parser.find("a", "sg-header-heading").text
+                    
+                    # Extract the course name from sg-header-heading
+                    name = parser.find("a", "sg-header-heading").text.strip()
+                    
+                    # Remove any code-like parts (e.g., "4 - ")
+                    name = name.split('-')[1].strip() if '-' in name else name.strip()
+                    
                     newCourse["name"] = name
+                    
                     grade_span = parser.find("span", "sg-header-heading sg-right").text.strip()
                     if "9 Weeks Grade " in grade_span:
                         grade_value = grade_span.replace("9 Weeks Grade ", "").strip()
                     else:
                         grade_value = grade_span
-                
+                    
                     grade_value = grade_value.replace('%', '')
-                
+                    
                     newCourse["grade"] = grade_value
 
                 for ac in assignementsContainer:
