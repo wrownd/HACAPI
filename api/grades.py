@@ -51,7 +51,7 @@ class handler(BaseHTTPRequestHandler):
                     parser = BeautifulSoup(f"<html><body>{hc}</body></html>", "lxml")
                     
                     # Extract the course name from sg-header-heading
-                    name = parser.find("a", "sg-header-heading").text
+                    name = parser.find("a", "sg-header-heading").text.strip().replace('\r\n', '').replace('  ', ' ')
                     
                     newCourse["name"] = name
                     
