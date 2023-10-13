@@ -48,20 +48,21 @@ class handler(BaseHTTPRequestHandler):
                 assignementsContainer = parser.find_all("div", "sg-content-grid")
 
                 for hc in headerContainer:
-                    parser = BeautifulSoup(
-                        f"<html><body>{hc}</body></html>", "lxml")
-
+                    parser = BeautifulSoup(f"<html><body>{hc}</body></html>", "lxml")
+                
                     name_parts = parser.find("a", "sg-header-heading").text.strip().split('-')
-                    name = ' '.join([part.strip() for part in name_parts[1].strip().split()])
+                    code = name_parts[0].strip()  # Extract the code part
+                    name = '-'.join(name_parts[1:]).strip()  # Extract the name part and join
                     newCourse["name"] = name
+                    newCourse["code"] = code  # Add the code to the course object
                     grade_span = parser.find("span", "sg-header-heading sg-right").text.strip()
                     if "9 Weeks Grade " in grade_span:
                         grade_value = grade_span.replace("9 Weeks Grade ", "").strip()
                     else:
                         grade_value = grade_span
-
+                
                     grade_value = grade_value.replace('%', '')
-
+                
                     newCourse["grade"] = grade_value
 
                 for ac in assignementsContainer:
