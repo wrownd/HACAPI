@@ -49,20 +49,20 @@ class handler(BaseHTTPRequestHandler):
 
                 for hc in headerContainer:
                     parser = BeautifulSoup(f"<html><body>{hc}</body></html>", "lxml")
-                    
+
                     # Extract the course name from sg-header-heading
                     name = parser.find("a", "sg-header-heading").text.strip().replace('\r\n', '').replace('  ', ' ')
-                    
+
                     newCourse["name"] = name
-                    
+
                     grade_span = parser.find("span", "sg-header-heading sg-right").text.strip()
                     if "9 Weeks Grade " in grade_span:
                         grade_value = grade_span.replace("9 Weeks Grade ", "").strip()
                     else:
                         grade_value = grade_span
-                    
+
                     grade_value = grade_value.replace('%', '')
-                    
+
                     newCourse["grade"] = grade_value
 
                 for ac in assignementsContainer:
@@ -80,6 +80,10 @@ class handler(BaseHTTPRequestHandler):
                             assignmentCategory = tds[3].text.strip()
                             assignmentScore = tds[4].text.strip()
                             assignmentTotalPoints = tds[5].text.strip()
+
+                            # Check if the totalPoints is "N/A" and make it "0.00"
+                            if assignmentTotalPoints == "N/A":
+                                assignmentTotalPoints = "0.00"
 
                             newCourse["assignments"].append(
                                 {
